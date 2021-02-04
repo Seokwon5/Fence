@@ -74,8 +74,6 @@
             android:layout_marginBottom="80dp"
             />
 
-
-
     </LinearLayout>
 
 </RelativeLayout>
