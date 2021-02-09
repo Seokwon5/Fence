@@ -1,9 +1,13 @@
 package com.dpplatform.oceancampus
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -13,6 +17,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.activity_login.*
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+
 
 class LoginActivity : AppCompatActivity() {
     var auth : FirebaseAuth? = null
@@ -38,14 +45,31 @@ class LoginActivity : AppCompatActivity() {
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         auth = FirebaseAuth.getInstance()
+        printHashKey()
 
+    }
+
+    fun printHashKey() {
+        try {
+            val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+            for (signature in info.signatures) {
+                val md: MessageDigest = MessageDigest.getInstance("SHA")
+                md.update(signature.toByteArray())
+                val hashKey: String = String(Base64.encode(md.digest(), 0))
+                Log.i("TAG", "printHashKey() Hash Key: $hashKey")
+            }
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e("TAG", "printHashKey()", e)
+        } catch (e: Exception) {
+            Log.e("TAG", "printHashKey()", e)
+        }
     }
 
 
 
     fun googleLogin() {
         var signInIntent = googleSignInClient?.signInIntent
-        startActivityForResult(signInIntent,GOOGLE_LOGIN_CODE )
+        startActivityForResult(signInIntent, GOOGLE_LOGIN_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -63,11 +87,10 @@ class LoginActivity : AppCompatActivity() {
 
         }
     }
-    fun firebaseAuthWithGoogle(account : GoogleSignInAccount?) {
-        var credential = GoogleAuthProvider.getCredential(account?.idToken,null)
+    fun firebaseAuthWithGoogle(account: GoogleSignInAccount?) {
+        var credential = GoogleAuthProvider.getCredential(account?.idToken, null)
         auth?.signInWithCredential(credential)
-                ?.addOnCompleteListener {
-                    task ->
+                ?.addOnCompleteListener { task ->
                     if (task.isSuccessful){
                         moveMainPage(task.result?.user)
                     }else{
@@ -79,8 +102,7 @@ class LoginActivity : AppCompatActivity() {
 
 
     fun signinAndSignup() {
-        auth?.createUserWithEmailAndPassword(email_edittext.text.toString(), password_edittext.text.toString())?.addOnCompleteListener {
-            task ->
+        auth?.createUserWithEmailAndPassword(email_edittext.text.toString(), password_edittext.text.toString())?.addOnCompleteListener { task ->
                 if (task.isSuccessful){
                     moveMainPage(task.result?.user)
                 }else if (task.exception?.message.isNullOrEmpty()){
@@ -94,8 +116,7 @@ class LoginActivity : AppCompatActivity() {
 
     fun signinEmail() {
         auth?.signInWithEmailAndPassword(email_edittext.text.toString(), password_edittext.text.toString())
-                ?.addOnCompleteListener {
-                task ->
+                ?.addOnCompleteListener { task ->
             if (task.isSuccessful){
                 moveMainPage(task.result?.user)
             }else{
@@ -104,9 +125,9 @@ class LoginActivity : AppCompatActivity() {
                  }
 
          }
-    fun moveMainPage(user:FirebaseUser?) {
+    fun moveMainPage(user: FirebaseUser?) {
         if (user != null) {
-            startActivity(Intent(this,MainActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
         }
       }
 
