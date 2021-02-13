@@ -3,11 +3,12 @@
     package="com.dpplatform.oceancampus">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE "/>
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/icon"
-        android:label="오션캠퍼스"
+        android:label="펜스"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
