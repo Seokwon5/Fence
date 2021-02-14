@@ -42,9 +42,7 @@
         android:layout_above="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:layout_below="@+id/my_toolbar"
         android:layout_height="1dp">
-
     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
