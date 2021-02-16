@@ -9,7 +9,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:label="펜스"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/fence"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".AddPhotoActivity"></activity>
