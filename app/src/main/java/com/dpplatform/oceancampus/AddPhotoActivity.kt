@@ -7,9 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.google.android.gms.auth.api.signin.internal.Storage
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_add_photo.*
+import model.ContentDTO
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -18,12 +21,16 @@ class AddPhotoActivity : AppCompatActivity() {
     var PICK_IMAGE_FROM_ALBUM = 0
     var storage : FirebaseStorage? = null
     var photoUri : Uri? = null
+    var auth : FirebaseAuth? = null
+    var fireStore : FirebaseFirestore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_photo)
-        //Initate storage
+        //Initate storage 초기화
         storage = FirebaseStorage.getInstance()
+        auth = FirebaseAuth.getInstance()
+        fireStore = FirebaseFirestore.getInstance()
 
         //Open the Album
         var PhotoPickerIntent = Intent(Intent.ACTION_PICK)
@@ -56,9 +63,31 @@ class AddPhotoActivity : AppCompatActivity() {
 
         var storageRef = storage?.reference?.child("images")?.child(imageFileName)
 
-        //FileUpload
+        //Callback Method
         storageRef?.putFile(photoUri!!)?.addOnSuccessListener {
-            Toast.makeText(this, getString(R.string.upload_success),Toast.LENGTH_SHORT).show()
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                var contentDTO = ContentDTO()
+
+                //Insert downloadUrl of image
+                contentDTO.imageUrl = uri.toString()
+
+                //Insert uid of user
+                contentDTO.uid = auth?.currentUser?.uid
+
+                //Insert userId
+                contentDTO.userid = auth?.currentUser?.email
+
+                //Insert explain of content
+                contentDTO.explain = addPhoto_edit_explain.text.toString()
+
+                //Insert TimeStamp
+                contentDTO.timeStamp = System.currentTimeMillis()
+
+                fireStore?.collection("images")?.document()?.set(contentDTO)
+
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
 
         }
     }
