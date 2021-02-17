@@ -78,6 +78,7 @@ class DetailViewFragment:Fragment() {
             }else {
                 viewholder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite_border)
             }
+
         }
 
         override fun getItemCount(): Int {
