@@ -1,4 +1,4 @@
-package navigation
+package com.dpplatform.oceancampus.navigation
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddPhotoActivity">
+    tools:context="com.dpplatform.oceancampus.navigation.AddPhotoActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"
@@ -13,7 +13,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/fenceicon"/>
+            android:src="@drawable/logo_title"/>
     </androidx.appcompat.widget.Toolbar>
     <LinearLayout
         android:id="@+id/toolbar_division"
