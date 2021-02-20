@@ -36,9 +36,12 @@ class DetailViewFragment:Fragment() {
         var contentUidList: ArrayList<String> = arrayListOf()
 
         init {
+
             fireStore?.collection("images")?.orderBy("timestamp")?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 contentDTOs.clear()
                 contentUidList.clear()
+                if (querySnapshot == null) return@addSnapshotListener
+
                 for (snapshot in querySnapshot!!.documents) {
                     var item = snapshot.toObject(ContentDTO::class.java)
                     contentDTOs.add(item!!)
@@ -60,7 +63,7 @@ class DetailViewFragment:Fragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             var viewholder = (holder as CustomViewHolder).itemView
 
-            viewholder.detailviewitem_prifile_textview.text = contentDTOs!![position].userid
+            viewholder.detailviewitem_prifile_textview.text = contentDTOs!![position].userId
 
             Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUrl).into(viewholder.detailviewitem_imageview_content)
 
@@ -77,6 +80,17 @@ class DetailViewFragment:Fragment() {
                 viewholder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite)
             }else {
                 viewholder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite_border)
+            }
+
+            //다른사람의 프로필 클릭
+            viewholder.detailviewitem_profile_image.setOnClickListener {
+                var fragment = UserFragment()
+                var bundle = Bundle()
+                bundle.putString("destinationUid",contentDTOs[position].uid)
+                bundle.putString("userId",contentDTOs[position].userId)
+                fragment.arguments = bundle
+                activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.main_content,fragment)?.commit()
+
             }
 
         }
