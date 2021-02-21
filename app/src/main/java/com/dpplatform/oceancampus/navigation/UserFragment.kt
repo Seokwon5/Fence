@@ -11,13 +11,16 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils.circleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.dpplatform.oceancampus.LoginActivity
 import com.dpplatform.oceancampus.MainActivity
 import com.dpplatform.oceancampus.R
 import com.dpplatform.oceancampus.navigation.model.ContentDTO
+import com.dpplatform.oceancampus.navigation.model.FollowDTO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_user.view.*
 
@@ -28,6 +31,9 @@ class UserFragment:Fragment() {
     var uid : String? = null
     var auth : FirebaseAuth? = null
     var currentUserUid : String? = null
+    companion object{
+        var PICK_PROFILE_FROM_ALBUM = 10
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -56,12 +62,62 @@ class UserFragment:Fragment() {
             mainactivity?.toolbar_title_image?.visibility = View.GONE
             mainactivity?.toolbar_username?.visibility = View.VISIBLE
             mainactivity?.toolbar_btn_back?.visibility = View.VISIBLE
-        }
 
+
+        }
         fragmentView?.account_recyclerview?.adapter = UserFragmentRecyclerViewAdapter()
         fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!,3)
+
+        fragmentView?.account_iv_profile?.setOnClickListener {
+            var photoPickerIntent = Intent(Intent.ACTION_PICK)
+            photoPickerIntent.type = "image/*"
+            activity?.startActivityForResult(photoPickerIntent,PICK_PROFILE_FROM_ALBUM)
+
+        }
+        getProfileImage()
         return fragmentView
     }
+    fun requestFollow(){
+        //Save data to my account
+        var tsDocFollowing = firestore?.collection("users")?.document(currentUserUid!!)
+        firestore?.runTransaction { transaction ->
+            var followDTO = transaction.get(tsDocFollowing!!).toObject(FollowDTO::class.java)
+            if (followDTO == null) {
+                followDTO = FollowDTO()
+                followDTO!!.followingCount = 1
+                followDTO!!.follwers[uid!!] = true
+
+                transaction.set(tsDocFollowing,followDTO)
+                return@runTransaction
+            }
+            if (followDTO.followings.containsKey(uid)){
+                //unFollow
+                followDTO?.followingCount = followDTO?.followingCount - 1
+                followDTO?.follwers?.remove(uid)
+            }else{
+                //Following
+                followDTO?.followingCount = followDTO?.followingCount + 1
+                followDTO?.follwers[uid!!] = true
+            }
+            transaction.set(tsDocFollowing,followDTO)
+            return@runTransaction
+
+           }
+        //Save data to third person
+
+        }
+
+
+    fun getProfileImage() {
+        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, FirebaseFirestoreException ->
+            if (documentSnapshot == null) return@addSnapshotListener
+            if (documentSnapshot.data != null) {
+                var url = documentSnapshot?.data!!["image"]
+                Glide.with(activity!!).load(url).apply(RequestOptions().circleCrop()).into(fragmentView?.account_iv_profile!!)
+            }
+        }
+    }
+
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         var contentDTOs : ArrayList<ContentDTO> = arrayListOf()
         init {
