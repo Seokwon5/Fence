@@ -1,5 +1,6 @@
 package com.dpplatform.oceancampus.navigation
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -92,15 +93,20 @@ class DetailViewFragment:Fragment() {
                 activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.main_content,fragment)?.commit()
 
             }
+            //말풍선 클릭시.
+            viewholder.detailviewitem_comment_imageview.setOnClickListener { v->
+                var intent = Intent(v.context , CommentActivity::class.java)
+                intent.putExtra("contentUid",contentUidList[position])
+                startActivity(intent)
+            }
 
         }
 
         override fun getItemCount(): Int {
             return contentDTOs.size
+
+
         }
-
-
-
 
         fun favoriteEvent(position: Int) {
             var tsDoc = fireStore?.collection("images")?.document(contentUidList[position])

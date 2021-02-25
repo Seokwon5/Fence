@@ -10,9 +10,11 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_comment.*
 
 class CommentActivity : AppCompatActivity() {
+    var contentUid : String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
+        contentUid = intent.getStringExtra("contentUid")
 
         comment_btn_send?.setOnClickListener {
             var comment = ContentDTO.Comment()
@@ -20,6 +22,10 @@ class CommentActivity : AppCompatActivity() {
             comment.uid = FirebaseAuth.getInstance().currentUser?.uid
             comment.comment = comment_edit_message.text.toString()
             comment.timestamp = System.currentTimeMillis()
+
+            FirebaseFirestore.getInstance().collection("images").document(contentUid!!).collection("comments").document().set(comment)
+
+            comment_edit_message.setText("")
 
 
             
