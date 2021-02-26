@@ -18,6 +18,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.dpplatform.oceancampus.LoginActivity
 import com.dpplatform.oceancampus.MainActivity
 import com.dpplatform.oceancampus.R
+import com.dpplatform.oceancampus.navigation.model.AlarmDTO
 import com.dpplatform.oceancampus.navigation.model.ContentDTO
 import com.dpplatform.oceancampus.navigation.model.FollowDTO
 import com.google.firebase.auth.FirebaseAuth
@@ -139,7 +140,7 @@ class UserFragment:Fragment() {
                 followDTO == FollowDTO()
                 followDTO!!.followerCount = 1
                 followDTO!!.followings[currentUserUid!!] = true
-
+                followerAlarm(uid!!)
                 transaction.set(tsDocFollower, followDTO!!)
                 return@runTransaction
             }
@@ -151,10 +152,21 @@ class UserFragment:Fragment() {
                 //Following
                 followDTO!!.followerCount = followDTO!!.followerCount + 1
                 followDTO!!.followings[currentUserUid!!] = true
+                followerAlarm(uid!!)
             }
             transaction.set(tsDocFollower, followDTO!!)
             return@runTransaction
         }
+    }
+    fun followerAlarm(destinationUid : String?) {
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = auth?.currentUser?.email
+        alarmDTO.uid = auth?.currentUser?.uid
+        alarmDTO.kind = 2
+        alarmDTO.timestamp = System.currentTimeMillis()
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+
     }
 
     
